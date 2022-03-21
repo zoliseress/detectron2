@@ -55,6 +55,40 @@ def cross_entropy(input, target, *, reduction="mean", **kwargs):
     return F.cross_entropy(input, target, reduction=reduction, **kwargs)
 
 
+def roc(input, target):
+    """
+    TODO
+    """
+    import numpy as np
+    from sklearn.metrics import auc, roc_curve
+    from sklearn.preprocessing import label_binarize
+
+    input_n = input.detach().to('cpu').numpy()
+    target_n = target.detach().to('cpu').numpy()
+    target_bin_n = label_binarize(target_n, classes=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+
+    fpr = dict()
+    tpr = dict()
+    roc_auc = dict()
+    num_of_classes = input.shape[1]
+
+    # UndefinedMetricWarning: No positive samples in y_true, true positive value should be meaningless
+    #   warnings.warn("No positive samples in y_true, "
+
+    sum_all = np.sum(input_n, axis=1)
+    for i in range(num_of_classes):
+        sum_row = np.sum(input_n[0])
+        fpr[i], tpr[i], thresholds = roc_curve(target_bin_n[:, i], input_n[:, i], drop_intermediate=False)
+        roc_auc[i] = auc(fpr[i], tpr[i])
+
+    fpr["micro"], tpr["micro"], _ = roc_curve(target_bin_n.ravel(), input_n.ravel())
+    roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+
+    ret = torch.tensor(roc_auc["micro"], dtype=torch.float32, requires_grad=True).to('cuda')
+
+    return ret
+
+
 class _NewEmptyTensorOp(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, new_shape):

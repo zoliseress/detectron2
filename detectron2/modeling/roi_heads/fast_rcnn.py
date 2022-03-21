@@ -309,8 +309,11 @@ class FastRCNNOutputLayers(nn.Module):
         else:
             proposal_boxes = gt_boxes = torch.empty((0, 4), device=proposal_deltas.device)
 
+        # TEST: extra losses can be added.
+        # from detectron2.layers import roc
         losses = {
             "loss_cls": cross_entropy(scores, gt_classes, reduction="mean"),
+            # "loss_roc": roc(scores, gt_classes),
             "loss_box_reg": self.box_reg_loss(
                 proposal_boxes, gt_boxes, proposal_deltas, gt_classes
             ),
