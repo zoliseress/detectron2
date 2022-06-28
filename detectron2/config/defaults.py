@@ -19,7 +19,8 @@ from .config import CfgNode as CN
 # Config definition
 # -----------------------------------------------------------------------------
 
-_C = CN()
+#_C = CN()
+_C = CN(new_allowed=True)
 
 # The version number, to upgrade from old configs to new ones if any
 # changes happen. It's recommended to keep a VERSION in your config file.
